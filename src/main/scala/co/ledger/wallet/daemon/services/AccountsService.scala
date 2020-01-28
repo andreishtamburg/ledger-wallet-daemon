@@ -1,5 +1,6 @@
 package co.ledger.wallet.daemon.services
 
+import java.net.URL
 import java.util.{Date, UUID}
 
 import cats.data.OptionT
@@ -10,8 +11,7 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import co.ledger.core
 import co.ledger.wallet.daemon.async.MDCPropagatingExecutionContext.Implicits.global
-import co.ledger.wallet.daemon.clients.ApiClient.FallbackParams
-import co.ledger.wallet.daemon.clients.ClientFactory
+import co.ledger.wallet.daemon.clients.{ClientFactory, ScalaHttpClientPool}
 import co.ledger.wallet.daemon.configurations.DaemonConfiguration
 import co.ledger.wallet.daemon.database.DaemonCache
 import co.ledger.wallet.daemon.exceptions.{ERC20NotFoundException, FallbackBalanceProviderException}
@@ -24,7 +24,6 @@ import co.ledger.wallet.daemon.schedulers.observers.SynchronizationResult
 import co.ledger.wallet.daemon.utils.Utils
 import co.ledger.wallet.daemon.utils.Utils.{RichBigInt, _}
 import com.google.common.cache.{CacheBuilder, CacheLoader}
-import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response}
 import javax.inject.{Inject, Singleton}
 import org.web3j.abi.datatypes.{Address, Function, Type, Uint}
@@ -95,7 +94,7 @@ class AccountsService @Inject()(daemonCache: DaemonCache) extends DaemonService 
       Try(FunctionEncoder.encode(function))
     }
 
-    def runWithFallback(cb: Future[BigInt], fallback: FallbackParams, client: Service[Request, Response], timeout: scala.concurrent.duration.Duration): Future[BigInt] = {
+    def runWithFallback(cb: Future[BigInt], url: URL, service: ScalaHttpClientPool, timeout: scala.concurrent.duration.Duration): Future[BigInt] = {
       Future(Await.result(cb, timeout)).recoverWith { case t =>
         warn(s"Failed to get balance from libcore: $t")
         info("Using fallback provider")
@@ -109,10 +108,10 @@ class AccountsService @Inject()(daemonCache: DaemonCache) extends DaemonService 
             case None => Success(s"""{"jsonrpc":"2.0","method":"eth_getBalance","params":["$address", "latest"],"id":1}""")
           }))
           response <- {
-            val request = Request(Method.Post, fallback.query).host(fallback.host)
+            val request = Request(Method.Post, url.getPath).host(url.getHost)
             request.setContentString(body)
             request.setContentType("application/json")
-            val fut: Future[Response] = client(request).asScala()
+            val fut: Future[Response] = service.execute(ScalaHttpClientPool.urlToHost(url), request).asScala()
             fut.onComplete {
               case Success(v) => info(s"Successfully retrieve json response from provider : $v")
               case Failure(t) => error("Unable to fetch from fallback provider", t)
@@ -128,7 +127,7 @@ class AccountsService @Inject()(daemonCache: DaemonCache) extends DaemonService 
             balance.getOrElse(throw new Exception("Failed to parse fallback provider result"))
           }))
         } yield result
-        result.getOrElseF(Future.failed(FallbackBalanceProviderException(accountInfo.walletInfo.walletName, fallback.host, fallback.query)))
+        result.getOrElseF(Future.failed(FallbackBalanceProviderException(accountInfo.walletInfo.walletName, url.getHost, url.getPath)))
       }
     }
 
@@ -145,9 +144,9 @@ class AccountsService @Inject()(daemonCache: DaemonCache) extends DaemonService 
     }
 
     daemonCache.withWallet(accountInfo.walletInfo) { wallet =>
-      ClientFactory.apiClient.fallbackClient(wallet.getCurrency.getName) match {
-        case Some((fallback, client)) =>
-          runWithFallback(balance, fallback, client, DaemonConfiguration.explorer.api.fallbackTimeout.milliseconds)
+      ClientFactory.apiClient.fallbackService(wallet.getCurrency.getName) match {
+        case Some((url, service)) =>
+          runWithFallback(balance, url, service, DaemonConfiguration.explorer.api.fallbackTimeout.milliseconds)
         case None =>
           balance
       }

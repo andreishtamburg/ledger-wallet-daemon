@@ -199,9 +199,17 @@ object DaemonConfiguration {
       val explorerVersion = Try(path.getString("explorer_version")).toOption
       currency -> PathConfig(host, port, fallback, explorerVersion)
     }.toMap
+
+    val fees = api.getConfigList("fees").asScala.toList.map { fee =>
+      val currency = fee.getString("currency")
+      val path = fee.getString("path")
+      currency -> FeesPath(path)
+    }.toMap
+
+
     val ws = explorer.getObject("ws").unwrapped().asScala.toMap.mapValues(_.toString)
     ExplorerConfig(
-      ApiConfig(fallbackTimeout, paths),
+      ApiConfig(fallbackTimeout, paths, fees),
       ClientConnectionConfig(connectionPoolSize, retryBackoffDelta, connectionPoolTtl, retryTtl, retryMin, retryPercent), ws)
   }
 
@@ -214,7 +222,7 @@ object DaemonConfiguration {
     }
   }
 
-  case class ApiConfig(fallbackTimeout: Int, paths: Map[String, PathConfig])
+  case class ApiConfig(fallbackTimeout: Int, paths: Map[String, PathConfig], fees: Map[String, FeesPath])
 
   case class PathConfig(host: String, port: Int, fallback: Option[String], explorerVersion: Option[String]) {
     def filterPrefix: PathConfig = {
@@ -236,5 +244,7 @@ object DaemonConfiguration {
   case class ExplorerConfig(api: ApiConfig, client: ClientConnectionConfig, ws: Map[String, String])
 
   case class Proxy(host: String, port: Int)
+
+  case class FeesPath(path: String)
 
 }

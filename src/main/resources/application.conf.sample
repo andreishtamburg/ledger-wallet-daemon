@@ -154,6 +154,103 @@ explorer = {
         port = ${?WALLET_XRP_EXPLORER_PORT}
       }
     ]
+    fees = [
+    {
+        currency = "bitcoin"
+        path = "/blockchain/v2/btc/fees"
+        path = ${?FEES_BTC_PATH}
+    }
+    {
+        currency = "bitcoin_testnet"
+        path = "/blockchain/v2/btc_testnet/fees"
+        path = ${?FEES_BTC_TESTNET_PATH}
+    }
+    {
+        currency = "dogecoin"
+        path = "/blockchain/v2/doge/fees"
+        path = ${?FEES_DOGE_PATH}
+    }
+    {
+        currency = "litecoin"
+        path = "/blockchain/v2/ltc/fees"
+        path = ${?FEES_LTC_PATH}
+    }
+    {
+        currency = "dash"
+        path = "/blockchain/v2/dash/fees"
+        path = ${?FEES_DASH_PATH}
+    }
+    {
+        currency = "komodo"
+        path = "/blockchain/v2/kmd/fees"
+        path = ${?FEES_KMD_PATH}
+    }
+    {
+        currency = "pivx"
+        path = "/blockchain/v2/pivx/fees"
+        path = ${?FEES_PIVX_PATH}
+    }
+    {
+        currency = "viacoin"
+        path = "/blockchain/v2/via/fees"
+        path = ${?FEES_VIA_PATH}
+    }
+    {
+        currency = "vertcoin"
+        path = "/blockchain/v2/vtc/fees"
+        path = ${?FEES_VTC_PATH}
+    }
+    {
+        currency = "digibyte"
+        path = "/blockchain/v2/dgb/fees"
+        path = ${?FEES_DGB_PATH}
+    }
+    {
+        currency = "bitcoin_cash"
+        path = "/blockchain/v2/abc/fees"
+        path = ${?FEES_ABC_PATH}
+    }
+    {
+        currency = "poswallet"
+        path = "/blockchain/v2/posw/fees"
+        path = ${?FEES_POSW_PATH}
+    }
+    {
+        currency = "stratis"
+        path = "/blockchain/v2/strat/fees"
+        path = ${?FEES_STRAT_PATH}
+    }
+    {
+        currency = "peercoin"
+        path = "/blockchain/v2/ppc/fees"
+        path = ${?FEES_PPC_PATH}
+    }
+    {
+        currency = "bitcoin_gold"
+        path = "/blockchain/v2/btg/fees"
+        path = ${?FEES_BTG_PATH}
+    }
+    {
+        currency = "zcash"
+        path = "/blockchain/v2/zec/fees"
+        path = ${?FEES_ZEC_PATH}
+    }
+    {
+        currency = "ethereum"
+        path = "/blockchain/v3/eth/fees"
+        path = ${?FEES_ETH_PATH}
+    }
+    {
+        currency = "ethereum_classic"
+        path = "/blockchain/v3/etc/fees"
+        path = ${?FEES_ETC_PATH}
+    }
+    {
+        currency = "ethereum_ropsten"
+        path = "/blockchain/v3/eth_ropsten/fees"
+        path = ${?FEES_ETH_ROPSTEN_PATH}
+    }
+    ]
   }
   
   ws = {

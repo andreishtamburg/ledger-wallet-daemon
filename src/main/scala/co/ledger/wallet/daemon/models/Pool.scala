@@ -304,7 +304,7 @@ object Pool {
     }
 
     core.WalletPoolBuilder.createInstance()
-      .setHttpClient(ClientFactory.httpClient)
+      .setHttpClient(ClientFactory.httpCoreClient)
       .setWebsocketClient(ClientFactory.webSocketClient)
       .setLogPrinter(new NoOpLogPrinter(ClientFactory.threadDispatcher.getMainExecutionContext, true))
       .setThreadDispatcher(ClientFactory.threadDispatcher)

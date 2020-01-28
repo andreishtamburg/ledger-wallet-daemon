@@ -101,6 +101,10 @@ case class SignatureSizeUnmatchException(txSize: Int, signatureSize: Int) extend
   val msg = "Signatures and transaction inputs size not matching"
 } with DaemonException(msg)
 
+case class InvalidUrlException(msg: String) extends {
+  val code = ErrorCodes.INVALID_URL_EXCEPTION
+} with DaemonException(msg)
+
 sealed abstract class DaemonException(msg: String, t: Throwable = null) extends Exception(msg, t) {
   def code: Int
   def msg: String
@@ -126,4 +130,5 @@ object ErrorCodes {
   val DAEMON_DATABASE_EXCEPTION = 302
   val PROVIDER_BALANCE_EXCEPTION = 303
   val CORE_DATABASE_EXCEPTION = 304
+  val INVALID_URL_EXCEPTION = 305
 }

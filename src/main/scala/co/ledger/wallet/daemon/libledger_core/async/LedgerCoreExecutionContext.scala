@@ -1,12 +1,12 @@
 package co.ledger.wallet.daemon.libledger_core.async
 
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.{Executors, LinkedBlockingQueue, ThreadFactory, ThreadPoolExecutor, TimeUnit}
+import java.util.concurrent._
 import java.util.{Timer, TimerTask}
 
 import co.ledger.core
-
 import co.ledger.wallet.daemon.configurations.DaemonConfiguration
+
 import scala.concurrent.ExecutionContext
 
 class LedgerCoreExecutionContext(ec: ExecutionContext) extends co.ledger.core.ExecutionContext {
@@ -43,4 +43,6 @@ object LedgerCoreExecutionContext {
         }
       )
     ))
+
+  def httpPool: ExecutionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool((r: Runnable) => new Thread(r, "libcore-http-client")))
 }
