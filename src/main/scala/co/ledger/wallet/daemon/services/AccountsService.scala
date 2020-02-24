@@ -82,6 +82,16 @@ class AccountsService @Inject()(daemonCache: DaemonCache) extends DaemonService 
     balanceCache.get(CacheKey(accountInfo, contract))
 
 
+  def getUtxo(accountInfo: AccountInfo, offset: Int, batch: Int): Future[List[UTXOView]] =
+    daemonCache.withAccountAndWallet(accountInfo) { (account, wallet) =>
+      for {
+        lastBlockHeight <- wallet.lastBlockHeight
+        utxos <- account.getUtxo(offset, batch).map(_.map(output => {
+          UTXOView(output.getAddress, output.getBlockHeight, lastBlockHeight - output.getBlockHeight, output.getValue.toBigInt.asScala)
+        }))
+      } yield utxos
+    }
+
   private def loadBalance(contract: Option[String], accountInfo: AccountInfo): Future[BigInt] = {
 
     def encodeBalanceFunction(address: String): Try[String] = {
