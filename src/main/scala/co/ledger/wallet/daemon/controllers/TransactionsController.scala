@@ -131,7 +131,6 @@ object TransactionsController {
                                          fees_level: Option[String],
                                          amount: String,
                                          merge_utxo_strategy: Option[String],
-                                         merge_strategy_max_utxo: Option[Int],
                                          exclude_utxos: Option[Map[String, Int]],
                                          partialTx: Option[Boolean]
                                         ) extends CreateTransactionRequest {
@@ -142,7 +141,6 @@ object TransactionsController {
     def transactionInfo: BTCTransactionInfo = BTCTransactionInfo(
       recipient, feesPerByteValue, fees_level, amountValue,
       merge_utxo_strategy.map(BitcoinLikePickingStrategy.valueOf).getOrElse(BitcoinLikePickingStrategy.OPTIMIZE_SIZE),
-      merge_strategy_max_utxo.getOrElse(-1),
       exclude_utxos.getOrElse(Map[String, Int]()),
       partialTx
     )
@@ -175,7 +173,6 @@ object TransactionsController {
                                 feeLevel: Option[String],
                                 amount: BigInt,
                                 pickingStrategy: BitcoinLikePickingStrategy,
-                                pickingStrategyMaxUtxo: Int,
                                 excludeUtxos: Map[String, Int],
                                 partialTx: Option[Boolean]) extends TransactionInfo {
     lazy val feeMethod: Option[FeeMethod] = feeLevel.map { level => FeeMethod.from(level) }
