@@ -52,10 +52,10 @@ class WalletPoolsController @Inject()(poolsService: PoolsService) extends Contro
   filter[DeprecatedRouteFilter].post("/pools/operations/synchronize") { request: Request => {
     info(s"SYNC wallet pools $request, Parameters(user: ${request.user.get.id})")
     val t0 = System.currentTimeMillis()
-      poolsService.syncOperations.map { result =>
+    poolsService.syncOperations.map { result =>
       val t1 = System.currentTimeMillis()
       info(s"Synchronization finished, elapsed time: ${t1 - t0} milliseconds")
-      result.collect{
+      result.collect {
         case Success(value) => value
         case Failure(t: AccountSyncException) =>
           SynchronizationResult(t.accountIndex, t.walletName, t.poolName, syncResult = false)
